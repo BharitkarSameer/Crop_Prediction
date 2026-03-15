@@ -312,9 +312,15 @@ if "lat" in params and "lon" in params and "gps_done" not in st.session_state:
 # ────────────────────────────────────────────────────────────────
 detected_lat = st.session_state.get("detected_lat", 20.5937)
 detected_lon = st.session_state.get("detected_lon", 78.9629)
-# Always sync session state keys so number_input reflects detected coords
-st.session_state["lat_field"] = float(detected_lat)
-st.session_state["lon_field"] = float(detected_lon)
+# Only sync fields when GPS just fired — not on every rerun (would overwrite manual input)
+if "lat_field" not in st.session_state:
+    st.session_state["lat_field"] = float(detected_lat)
+if "lon_field" not in st.session_state:
+    st.session_state["lon_field"] = float(detected_lon)
+if st.session_state.get("gps_done"):
+    st.session_state["lat_field"] = float(detected_lat)
+    st.session_state["lon_field"] = float(detected_lon)
+    st.session_state["gps_done"] = False  # clear flag so future reruns don't overwrite
 
 st.markdown('<div class="card"><div class="card-title">📍 Auto-fill From Your Location</div>', unsafe_allow_html=True)
 st.markdown('<p style="color:#8ab89a;font-size:0.88rem;margin-bottom:0.8rem;">Click the button below to detect your location automatically, or enter coordinates manually.</p>', unsafe_allow_html=True)
